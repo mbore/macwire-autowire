@@ -8,10 +8,6 @@ import com.softwaremill.SbtSoftwareMillCommon.commonSmlBuildSettings
 import sbt._
 import Keys._
 
-import scala.util.Try
-import scala.sys.process.Process
-import complete.DefaultParsers._
-
 val doobieVersion = "1.0.0-RC1"
 val http4sVersion = "0.23.7"
 val circeVersion = "0.14.1"
@@ -75,8 +71,8 @@ val apiDocsDependencies = Seq(
 )
 
 val macwireDependencies = Seq(
-//  "com.softwaremill.macwire" %% "macros" % macwireVersion,
-  "com.softwaremill.macwire" %% "macrosautocats" % "2.5.5"
+  "com.softwaremill.macwire" %% "macros" % macwireVersion,
+  "com.softwaremill.macwire" %% "macrosautocats" % macwireVersion
 ).map(_ % Provided)
 
 val scalatest = "org.scalatest" %% "scalatest" % "3.2.10" % Test
