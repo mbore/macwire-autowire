@@ -1,18 +1,18 @@
 package com.softwaremill.macwire.autowire
 
 import cats.effect.{ExitCode, IO, IOApp, Resource}
+import cats.implicits._
+import com.softwaremill.macwire.autocats.autowire
 import com.softwaremill.macwire.autowire.config.{ConfigLoader, CrawlersConfig, DatabaseConfig}
-import com.softwaremill.macwire.autowire.crawler.{CrawlingService, Worker}
+import com.softwaremill.macwire.autowire.crawler.{CrawlerEC, CrawlingService, Worker}
 import com.softwaremill.macwire.autowire.database.{DbReaderA, DbReaderB, DbWriterA, DbWriterB}
 import com.softwaremill.macwire.autowire.http.HttpApi
-import doobie.hikari.HikariTransactor
-import sttp.client3.http4s.Http4sBackend
-import cats.implicits._
 import com.softwaremill.macwire.autowire.service.{ServiceA, ServiceB}
-import io.prometheus.client.CollectorRegistry
-import com.softwaremill.macwire.autocats.autowire
 import com.softwaremill.tagging._
 import doobie.Transactor
+import doobie.hikari.HikariTransactor
+import io.prometheus.client.CollectorRegistry
+import sttp.client3.http4s.Http4sBackend
 
 case class Crawlers(value: Vector[Resource[IO, Worker]])
 case class Dependencies(crawlers: Crawlers, api: HttpApi)
@@ -39,6 +39,9 @@ object Main extends IOApp {
     } yield xa
   }
 
+  def buildCrawlerEC(cfg: CrawlersConfig): Resource[IO, CrawlerEC] =
+    doobie.util.ExecutionContexts.fixedThreadPool[IO](cfg.services.size).map(new CrawlerEC(_))
+
   override def run(args: List[String]): IO[ExitCode] =
     ConfigLoader
       .loadConfig()
@@ -58,7 +61,8 @@ object Main extends IOApp {
           (xa: Transactor[IO] @@ DbB) => new DbReaderB(xa),
           Http4sBackend.usingDefaultBlazeClientBuilder[IO](),
           CollectorRegistry.defaultRegistry,
-          buildCrawlers _
+          buildCrawlers _,
+          buildCrawlerEC _
         )
       }
       //TODO start whole set of crawlers
