@@ -11,7 +11,6 @@ import com.softwaremill.macwire.autowire.service.{ServiceA, ServiceB}
 import com.softwaremill.tagging._
 import doobie.Transactor
 import doobie.hikari.HikariTransactor
-import io.prometheus.client.CollectorRegistry
 import sttp.client3.http4s.Http4sBackend
 
 case class Crawlers(value: Vector[Resource[IO, Worker]])
@@ -55,10 +54,10 @@ object Main extends IOApp {
           cfg.crawlers,
           buildTansactor(cfg.dbA).taggedWithF[DbA],
           buildTansactor(cfg.dbB).taggedWithF[DbB],
-          (xa: Transactor[IO] @@ DbA) => new DbWriterA(xa),
-          (xa: Transactor[IO] @@ DbA) => new DbReaderA(xa),
-          (xa: Transactor[IO] @@ DbB) => new DbWriterB(xa),
-          (xa: Transactor[IO] @@ DbB) => new DbReaderB(xa),
+          new DbWriterA(_: Transactor[IO] @@ DbA),
+          new DbReaderA(_: Transactor[IO] @@ DbA),
+          new DbWriterB(_: Transactor[IO] @@ DbB),
+          new DbReaderB(_: Transactor[IO] @@ DbB),
           Http4sBackend.usingDefaultBlazeClientBuilder[IO](),
           buildCrawlers _,
           buildCrawlerEC _

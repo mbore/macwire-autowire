@@ -4,7 +4,6 @@ import cats.data.{Kleisli, OptionT}
 import cats.effect.{IO, Resource}
 import com.softwaremill.macwire.autowire.config.HttpServerConfig
 import com.typesafe.scalalogging.StrictLogging
-import io.prometheus.client.CollectorRegistry
 import org.http4s.blaze.server.BlazeServerBuilder
 import org.http4s.server.Router
 import org.http4s.{HttpRoutes, Request}
