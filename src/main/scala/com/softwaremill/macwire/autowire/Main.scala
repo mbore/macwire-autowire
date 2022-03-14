@@ -60,7 +60,6 @@ object Main extends IOApp {
           (xa: Transactor[IO] @@ DbB) => new DbWriterB(xa),
           (xa: Transactor[IO] @@ DbB) => new DbReaderB(xa),
           Http4sBackend.usingDefaultBlazeClientBuilder[IO](),
-          CollectorRegistry.defaultRegistry,
           buildCrawlers _,
           buildCrawlerEC _
         )
